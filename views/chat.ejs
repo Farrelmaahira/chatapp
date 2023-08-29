@@ -9,7 +9,7 @@
           <div class="card-body">
             <ul class="list-unstyled mb-0">
               <li class="p-2 border-bottom" style="background-color: #eee;">
-                <a href="#!" class="d-flex justify-content-between">
+                <a href="chat/2" class="d-flex justify-content-between" id="chat-link">
                   <div class="d-flex flex-row">
                     <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-8.webp" alt="avatar"
                       class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60">
@@ -31,7 +31,7 @@
 
       <div class="col-md-6 col-lg-7 col-xl-8">
         <h2 class="chat-header">
-          Brad Pitt 
+          Brad Pitt
         </h2>
         <ul class="list-unstyled">
           <li class="d-flex justify-content-between mb-4">
@@ -50,50 +50,57 @@
               </div>
             </div>
           </li>
-          <li class="d-flex justify-content-between mb-4">
-            <div class="card w-100">
-              <div class="card-header d-flex justify-content-between p-3">
-                <p class="fw-bold mb-0">Lara Croft</p>
-                <p class="text-muted small mb-0"><i class="far fa-clock"></i> 13 mins ago</p>
-              </div>
-              <div class="card-body">
-                <p class="mb-0">
-                  Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
-                  laudantium.
-                </p>
-              </div>
-            </div>
-            <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-5.webp" alt="avatar"
-              class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60">
-          </li>
-          <li class="d-flex justify-content-between mb-4">
-            <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-6.webp" alt="avatar"
-              class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" width="60">
-            <div class="card">
-              <div class="card-header d-flex justify-content-between p-3">
-                <p class="fw-bold mb-0">Brad Pitt</p>
-                <p class="text-muted small mb-0"><i class="far fa-clock"></i> 10 mins ago</p>
-              </div>
-              <div class="card-body">
-                <p class="mb-0">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                  labore et dolore magna aliqua.
-                </p>
-              </div>
-            </div>
-          </li>
           <li class="bg-white mb-3">
-            <div class="form-outline">
-              <textarea class="form-control" id="textAreaExample2" rows="4"></textarea>
-              <label class="form-label" for="textAreaExample2">Message</label>
-            </div>
+            <form action="" id="message-form">
+              <div class="form-outline">
+                <textarea class="form-control" id="message-field" rows="4"></textarea>
+              </div>
           </li>
-          <button type="button" class="btn btn-info btn-rounded float-end">Send</button>
+          <button type="submit" class="btn btn-info btn-rounded float-end">Send</button>
+          </form>
         </ul>
 
       </div>
-
     </div>
 
   </div>
 </section>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io('http://localhost:3002/', {
+    query: {
+      token: sessionStorage.getItem('token')
+    }
+  })
+
+  socket.on('messages', (data) => {
+    console.log(data)
+  })
+
+  var recieverData;
+  $(document).ready(function () {
+    $('#chat-link').on('click', (e) => {
+      e.preventDefault()
+      const link = $('#chat-link').prop('href')
+      console.log(link)
+      fetch(link).then(async (res) => {
+        const data = await res.json()
+        recieverData = data
+      }).catch(async (e) => {
+        const error = await e
+        console.error(error)
+      })
+    })
+    
+    $('#message-form').on('submit', (e) => {
+      e.preventDefault()
+      const message = $('#message-field').val()
+      const data = {
+        to: 1,
+        message: message
+      }
+      socket.emit('sendmessage', data)
+    })
+  })
+</script>
