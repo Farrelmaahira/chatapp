@@ -12,7 +12,7 @@ require('dotenv').config()
 
 
 
-router.get('/login', (req,res)=>{
+router.get('/', (req,res)=>{
   
   res.render('../views/login.ejs', { page : 'login.ejs'})
 })
