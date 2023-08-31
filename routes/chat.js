@@ -41,5 +41,16 @@ router.get('/api/chat',passport.authenticate('jwt', {session : false}) , async(r
   }
 })
 
+router.get('/api/testing/chat',async(req,res)=>{
+  const data = await Message.findAll({
+    include : {
+      model : User,
+      required : true
+    } 
+  }) 
+  
+  console.log(data)
+})
+
 
 module.exports = router

@@ -12,7 +12,8 @@ const socket = io('http://localhost:3002', {
 //   to : 1,
 //   message : 'hello juga'
 // })
-socket.on('messages', (data)=>{
-  console.log(data)
-})
-console.log('running')
+// socket.on('messages', (data)=>{
+//   console.log(data)
+// })
+
+console.log(process.env.PORT)
