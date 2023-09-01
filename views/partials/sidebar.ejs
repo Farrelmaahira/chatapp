@@ -1,26 +1,42 @@
-
-      <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
         <h5 class="font-weight-bold mb-3 text-center text-lg-start">Member</h5>
-        <div class="card">
-          <div class="card-body">
-            <ul class="list-unstyled mb-0">
-              <li class="p-2 border-bottom" style="background-color: #eee;">
-                <a href="chat/2" class="d-flex justify-content-between" id="chat-link">
-                  <div class="d-flex flex-row">
-                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-8.webp" alt="avatar"
-                      class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60">
-                    <div class="pt-1">
-                      <p class="fw-bold mb-0">John Doe</p>
-                      <p class="small text-muted">Hello, Are you there?</p>
+        <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0 " id="member-list"></div>
+
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script>
+          let memberList = document.getElementById('member-list')
+          fetch('http://localhost:3002/api/users', {
+            headers: {
+              token: sessionStorage.getItem('token')
+            }
+          }).then(async (res) => {
+            const data = await res.json()
+            // console.log(data)
+            data.map(function (value) {
+              console.log('value', value)
+              return (
+                memberList.innerHTML += `
+                  <div class="card mb-2">
+                    <div class="card-body">
+                      <ul class="list-unstyled mb-0">
+                        <li class="p-2" style="background-color: white;">
+                          <a href="chat?id=${value.id}" class="d-flex justify-content-between" id="chat-link" onclick='handleClick(event, ${value.id})'>
+                            <div class="d-flex flex-row">
+                              <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-8.webp" alt="avatar"
+                                class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60">
+                              <div class="pt-1">
+                                <p class="fw-bold mb-0">${value.username}</p>
+                                <p class="small text-muted">Hello, Are you there?</p>
+                              </div>
+                            </div>
+                            <div class="pt-1">
+                            </div>
+                          </a>
+                        </li>
+                      </ul>
                     </div>
                   </div>
-                  <div class="pt-1">
-                    <p class="small text-muted mb-1">Just now</p>
-                    <span class="badge bg-danger float-end">1</span>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+        `
+              )
+            })
+          })
+        </script>

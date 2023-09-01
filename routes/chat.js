@@ -6,14 +6,24 @@ const passport = require('passport')
 require('./../middleware/passport')()
 
 router.get('/chat', async (req,res)=>{
-  const user = await User.findAll()
-  res.render('../views/chat.ejs', {
-    users : user 
-  })
+  res.render('../views/chat.ejs')
 }) 
 
+router.get('/api/users', passport.authenticate('jwt', {session : false}), async(req,res)=>{
+  const userId = req.user?.id
+  const users = await User.findAll({
+    where : {
+      id : {
+        [Op.ne] : userId 
+      } 
+    }
+  })
+  
+  res.send(users)
+})
+
 router.get('/api/chat',passport.authenticate('jwt', {session : false}) , async(req,res)=>{
-  const authUser = req.user?.id
+  const authUserId = req.user?.id
   const id = req.query?.id
 
   if(id) {
@@ -25,8 +35,11 @@ router.get('/api/chat',passport.authenticate('jwt', {session : false}) , async(r
   
   const message = await Message.findAll({
     where : {
-      sender_id : authUser ,
-      reciever_id : id,
+      [Op.or] : [{sender_id : authUserId, reciever_id : id},{sender_id : id, reciever_id : authUserId}]
+    },
+    include : {
+      model : User,
+      as : 'user'
     }
   })
   
@@ -34,7 +47,9 @@ router.get('/api/chat',passport.authenticate('jwt', {session : false}) , async(r
     messages : message,
     user : data
   })
-  } else {
+
+} else {
+
     return res.send({
       message : 'please select a user'
     })
@@ -45,11 +60,11 @@ router.get('/api/testing/chat',async(req,res)=>{
   const data = await Message.findAll({
     include : {
       model : User,
-      required : true
-    } 
+      as : 'user'
+    }
   }) 
   
-  console.log(data)
+  res.send(data)
 })
 
 

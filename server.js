@@ -92,8 +92,12 @@ io.use((socket, next) => {
         reciever_id: recieverUser.id,
       },
       order: [['createdAt', 'DESC']],
+      include : {
+        model : User,
+        as : 'user'
+      }
     })
-    socket.to(recieverUser.socketId).emit('messages', { data: message.message })
+    socket.to(recieverUser.socketId).emit('messages', { data: message.message, from : message.user })
   })
 
   socket.on('disconnect', async (reason, details) => {

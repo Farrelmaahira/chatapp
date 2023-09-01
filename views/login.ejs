@@ -41,7 +41,6 @@
         email: $('#email').val(),
         password: $('#password').val()
       }
-      console.log(body)
       fetch('http://localhost:3002/auth/login',{
         method : 'POST',
         body : JSON.stringify({
@@ -53,8 +52,10 @@
         }
       }).then(async(res)=> {
       const data = await res.json() 
+      console.log(data.data.username)
       console.log(data.token)
       sessionStorage.setItem('token', data.token)
+      sessionStorage.setItem('user', data.data.username)
       window.location.href='http://localhost:3002/chat'
       }).catch((err)=>{
         console.log(err) 

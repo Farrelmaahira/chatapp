@@ -1,43 +1,23 @@
 <%- include('partials/navbar.ejs') %>
 
-<section style="background-color: #eee;">
+<section style="background-color: white;">
   <div class="container py-5">
     <div class="row">
-      <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
-        <h5 class="font-weight-bold mb-3 text-center text-lg-start">Member</h5>
-        <% users.map(function(user){ %>
-        <div class="card">
-          <div class="card-body">
-            <ul class="list-unstyled mb-0">
-              <li class="p-2 border-bottom" style="background-color: #eee;">
-                <a href="chat?id=<%= user.id %>" class="d-flex justify-content-between chat-link">
-                  <div class="d-flex flex-row">
-                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-8.webp" alt="avatar"
-                      class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60">
-                    <div class="pt-1">
-                      <p class="fw-bold mb-0"><%= user.username %></p>
-                      <p class="small text-muted">Hello, Are you there?</p>
-                    </div>
-                  </div>
-                  <div class="pt-1">
-                    <p class="small text-muted mb-1">Just now</p>
-                    <span class="badge bg-danger float-end">1</span>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <%}) %>
-      </div>
+
+      <!-- SIDEBAR -->
+      <%- include('partials/sidebar.ejs') %>
+      <!-- END SIDEBAR -->
       <div class="col-md-6 col-lg-7 col-xl-8">
         <h2 id="chat-header">
-          Brad Pitt
         </h2>
-        <ul class="list-unstyled" id="chat-lists">
-        </ul>
+        <div class="chat-container">
+          <ul class="list-styled" id="chat-lists">
+            <!-- FETCHED MESSAGE -->
+          </ul>
+        </div>
+
         <!-- FORM MESSGAE -->
-        <div class="bg-white mb-3">
+        <div class="bg-white mb-3" id="message-container">
           <form action="" id="message-form">
             <div class="form-outline">
               <textarea class="form-control" id="message-field" rows="4"></textarea>
@@ -45,14 +25,17 @@
             <button type="submit" class="btn btn-info btn-rounded float-end">Send</button>
           </form>
         </div>
-
       </div>
+
     </div>
   </div>
 </section>
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
+  const messageFormContainer = document.getElementById('message-container')
+  messageFormContainer.style.display = 'none'
   const chatList = document.getElementById('chat-lists')
   const socket = io('http://localhost:3002/', {
     query: {
@@ -63,12 +46,12 @@
   let recieveChatCard = document.getElementById('chat-message')
 
   socket.on('messages', (data) => {
-    // chatList.innerHTML = ''
+    console.log(data)
     chatList.innerHTML += `
           <li class="d-flex justify-content-between mb-4">
             <div class="card">
               <div class="card-header d-flex justify-content-between p-3">
-                <p class="fw-bold mb-0">Brad Pitt</p>
+                <p class="fw-bold mb-0">${data.from.username}</p>
               </div>
               <div class="card-body">
                 <p class="mb-0" id="chat-message">${data.data}</p>
@@ -79,38 +62,29 @@
     console.log(data.data)
   })
 
-  fetch('http://localhost:3002/api/chat', {
-    headers: {
-      'token': sessionStorage.getItem('token')
-    }
-  }).then(async (res) => {
-    const response = await res.json()
-    console.log(response)
-  }).catch((error) => {
-    console.log(error)
-  })
+  let recieverData;
 
-  $(document).ready(function () {
-    var recieverData;
-    $('.chat-link').on('click', function (e) {
-      e.preventDefault()
-      let token = sessionStorage.getItem('token').toString()
-      const link = $(this).attr('href')
-      console.log(link)
-      fetch(`http://localhost:3002/api/${link}`, {
-        headers: {
-          'token': token
-        }
-      }).then(async (res) => {
-        const data = await res.json()
-        const message = data.messages
-        if (message.length > 0) {
-          message.map(function (value) {
-              chatList.innerHTML += `
+  function handleClick(e, id) {
+    e.preventDefault()
+    chatList.innerHTML = ''
+    messageFormContainer.style.display = 'block'
+    fetch(`http://localhost:3002/api/chat?id=${id}`, {
+      headers: {
+        token: sessionStorage.getItem('token')
+      }
+    }).then(async (result) => {
+      const data = await result.json()
+      console.log(data.user)
+      recieverData = data.user
+      document.getElementById('chat-header').innerHTML = recieverData.username
+      const message = data.messages
+      if (message.length > 0) {
+        message.map(function (value) {
+          chatList.innerHTML += `
           <li class="d-flex justify-content-between mb-4">
             <div class="card">
-              <div class="card-header d-flex justify-content-between p-3">
-                <p class="fw-bold mb-0">Brad Pitt</p>
+              <div class="card-header p-3">
+                <p class="fw-bold mb-0">${value.user.username}</p>
               </div>
               <div class="card-body">
                 <p class="mb-0" id="chat-message">${value.message}</p>
@@ -118,23 +92,16 @@
             </div>
           </li>
           `
-          })
-        } else {
-          chatList.innerHTML = ''
-        }
-        
-        
-        console.log(data)
-        recieverData = data.user
-
-        let chatHeader = document.getElementById('chat-header')
-        chatHeader.innerHTML = recieverData.username
-        console.log(recieverData)
-      }).catch((e) => {
-        console.error(e)
-      })
+        })
+      } else {
+        chatList.innerHTML = ''
+      }
+    }).catch((error) => {
+      console.error(error)
     })
+  }
 
+  $(document).ready(function () {
     $('#message-form').on('submit', (e) => {
       e.preventDefault()
       const message = $('#message-field').val()
@@ -142,10 +109,21 @@
         to: recieverData.id,
         message: message
       }
+
       socket.emit('sendmessage', data)
-      document.getElementById('message-field').value = ''
+      $('#message-field').val('')
+      chatList.innerHTML += `
+          <li class="d-flex justify-content-between mb-4">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between p-3">
+                <p class="fw-bold mb-0">${sessionStorage.getItem('user')}</p>
+              </div>
+              <div class="card-body">
+                <p class="mb-0" id="chat-message">${data.message}</p>
+              </div>
+            </div>
+          </li>
+          `
     })
   })
-  
-
 </script>
