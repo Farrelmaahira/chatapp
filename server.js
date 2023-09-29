@@ -43,12 +43,22 @@ app.use(
   express.static(path.join(__dirname, 'node_modules/jquery/dist/'))
 )
 app.use(express.static(path.join(__dirname, 'views/partials/style.css')))
+
 app.use(bodyParser.urlencoded({ extended: false }))
+
 app.use(bodyParser.json())
+
 app.use(cors())
+
 app.use(passport.initialize())
 
 app.use(authRoutes)
+
+// app.use((req,res,next)=>{
+//   console.log(req.user)
+//   // next()
+// })
+
 app.use(chatRoutes)
 
 const io = new Server(server, {
@@ -76,7 +86,6 @@ io.use((socket, next) => {
     { socketId: socket.id },
     { where: { id: socket.decoded.id } }
   )
-  console.log(socket.decoded)
   console.log('connected with ' + socket.id + socket.decoded.id)
 
   socket.on('sendmessage', async (data) => {

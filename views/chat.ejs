@@ -34,9 +34,12 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
+
   const messageFormContainer = document.getElementById('message-container')
   messageFormContainer.style.display = 'none'
+
   const chatList = document.getElementById('chat-lists')
+
   const socket = io('http://localhost:3002/', {
     query: {
       token: sessionStorage.getItem('token')
@@ -126,4 +129,11 @@
           `
     })
   })
+
+</script>
+
+<script>
+  if (!sessionStorage.getItem('token')) {
+    window.location = 'http://localhost:3002'
+  }
 </script>

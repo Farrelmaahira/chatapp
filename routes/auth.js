@@ -10,10 +10,8 @@ const {User} = require('./../models/index')
 
 require('dotenv').config()
 
-
-
 router.get('/', (req,res)=>{
-  res.render('../views/login.ejs', { page : 'login.ejs'})
+  res.render('../views/login.ejs')
 })
 
 router.post('/auth/register', async (req,res)=> {

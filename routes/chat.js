@@ -5,7 +5,7 @@ const { Op } = require('sequelize')
 const passport = require('passport')
 require('./../middleware/passport')()
 
-router.get('/chat', async (req,res)=>{
+router.get('/chat',  async (req,res)=>{
   res.render('../views/chat.ejs')
 }) 
 
@@ -54,17 +54,6 @@ router.get('/api/chat',passport.authenticate('jwt', {session : false}) , async(r
       message : 'please select a user'
     })
   }
-})
-
-router.get('/api/testing/chat',async(req,res)=>{
-  const data = await Message.findAll({
-    include : {
-      model : User,
-      as : 'user'
-    }
-  }) 
-  
-  res.send(data)
 })
 
 
